@@ -1,11 +1,10 @@
 blueprint:
   name: Bevegelse-lys (6 tidsvinduer) + Climate (bevegelse eller ukedag/helg-plan)
   description: >
-    Slår på dimmerlys ved bevegelse med 6 tidsvinduer for brightness (%). Kun setter brightness når lyset er AV,
-    slik at manuell dimming respekteres helt til lyset slås av. Felles av-forsinkelse. Valgfri climate-styring:
+    Slår på dimmerlys ved bevegelse med 6 tidsvinduer for brightness (%). Setter brightness kun når lyset er AV
+    slik at manuell dimming respekteres til lyset har vært av igjen. Felles av-forsinkelse. Valgfri climate-styring:
     enten bevegelse-basert eller tidsskjema med ukedager/helg (4 on/off-par hver).
   domain: automation
-  source_url: https://example.local/blueprints/motion_light_climate  # valgfritt
 
   input:
     motion_sensor:
@@ -32,7 +31,7 @@ blueprint:
           min: 1
           max: 180
           step: 1
-          unit_of_measurement: min
+          unit_of_measurement: "min"
           mode: slider
 
     transition_seconds:
@@ -44,7 +43,7 @@ blueprint:
           min: 0
           max: 10
           step: 1
-          unit_of_measurement: s
+          unit_of_measurement: "s"
           mode: slider
 
     # 6 tidsvinduer: start, slutt, brightness %
@@ -62,7 +61,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     t2_start:
       name: Tidsvindu 2 - start
@@ -78,7 +78,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     t3_start:
       name: Tidsvindu 3 - start
@@ -94,7 +95,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     t4_start:
       name: Tidsvindu 4 - start
@@ -110,7 +112,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     t5_start:
       name: Tidsvindu 5 - start
@@ -126,7 +129,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     t6_start:
       name: Tidsvindu 6 - start
@@ -142,7 +146,8 @@ blueprint:
           min: 1
           max: 100
           step: 1
-          unit_of_measurement: %
+          unit_of_measurement: "%"
+          mode: slider
 
     # Climate (valgfritt)
     climate_entity:
@@ -176,7 +181,7 @@ blueprint:
           min: 5
           max: 30
           step: 0.5
-          unit_of_measurement: °C
+          unit_of_measurement: "°C"
 
     rest_mode:
       name: Hvilemodus etter inaktivitet
@@ -200,7 +205,7 @@ blueprint:
           min: 5
           max: 25
           step: 0.5
-          unit_of_measurement: °C
+          unit_of_measurement: "°C"
 
     min_cycle_buffer_minutes:
       name: Climate buffer før av (min) ved bevegelsesstyring
@@ -211,7 +216,7 @@ blueprint:
           min: 0
           max: 60
           step: 1
-          unit_of_measurement: min
+          unit_of_measurement: "min"
 
     # Tidsplan ukedager/helg – 4 on/off-par
     workday_sensor:
@@ -227,14 +232,24 @@ blueprint:
     wd_on1_setpoint:
       name: Ukedager ON1 setpoint (°C)
       default: 21
-      selector: { number: { min: 5, max: 30, step: 0.5, unit_of_measurement: °C } }
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: "°C"
     wd_off1_time: { name: Ukedager OFF1 tid, selector: { time: {} } }
 
     wd_on2_time: { name: Ukedager ON2 tid, selector: { time: {} } }
     wd_on2_setpoint:
       name: Ukedager ON2 setpoint (°C)
       default: 22
-      selector: { number: { min: 5, max: 30, step: 0.5, unit_of_measurement: °C } }
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: "°C"
     wd_off2_time: { name: Ukedager OFF2 tid, selector: { time: {} } }
 
     # Helg
@@ -242,14 +257,24 @@ blueprint:
     we_on1_setpoint:
       name: Helg ON1 setpoint (°C)
       default: 22
-      selector: { number: { min: 5, max: 30, step: 0.5, unit_of_measurement: °C } }
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: "°C"
     we_off1_time: { name: Helg OFF1 tid, selector: { time: {} } }
 
     we_on2_time: { name: Helg ON2 tid, selector: { time: {} } }
     we_on2_setpoint:
       name: Helg ON2 setpoint (°C)
       default: 21
-      selector: { number: { min: 5, max: 30, step: 0.5, unit_of_measurement: °C } }
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: "°C"
     we_off2_time: { name: Helg OFF2 tid, selector: { time: {} } }
 
 mode: parallel
@@ -302,13 +327,10 @@ variables:
   we_off2_time: !input we_off2_time
 
   # Beregn aktivt tidsvindu og ønsket brightness
-  now_time: >
-    {{ now().time() }}
   active_pct: >
     {% macro between(s,e,n) -%}
       {%- set s = strptime(s, '%H:%M:%S').time() -%}
       {%- set e = strptime(e, '%H:%M:%S').time() -%}
-      {%- set n = n -%}
       {%- if s <= e -%}
         {{ (n >= s and n < e) }}
       {%- else -%}
@@ -387,7 +409,7 @@ action:
                   brightness_pct: "{{ active_pct | int }}"
                   transition: !input transition_seconds
 
-          # Vent på inaktivitet (fornyes ved ny bevegelse pga mode: parallel + ny kjøring)
+          # Vent på inaktivitet (fornyes ved ny bevegelse pga ny kjøring)
           - wait_for_trigger:
               - platform: state
                 entity_id: !input motion_sensor
@@ -444,8 +466,7 @@ action:
       # ------------- Ukedager tidsplan -------------
       - conditions:
           - condition: trigger
-            id:
-              - wd_on1
+            id: wd_on1
         sequence:
           - if:
               - condition: template
@@ -460,24 +481,29 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - wd_off1
+            id: wd_off1
         sequence:
           - if:
               - condition: template
                 value_template: "{{ climate_mode == 'schedule' and climate_entity != '' and is_state(workday_sensor, 'on') }}"
             then:
               - choose:
-                  - conditions: "{{ rest_mode == 'off' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'off' }}"
                     sequence:
                       - service: climate.turn_off
                         target: { entity_id: !input climate_entity }
-                  - conditions: "{{ rest_mode == 'eco' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'eco' }}"
                     sequence:
                       - service: climate.set_preset_mode
                         target: { entity_id: !input climate_entity }
                         data: { preset_mode: eco }
-                  - conditions: "{{ rest_mode == 'heat' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'heat' }}"
                     sequence:
                       - service: climate.set_hvac_mode
                         target: { entity_id: !input climate_entity }
@@ -488,8 +514,7 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - wd_on2
+            id: wd_on2
         sequence:
           - if:
               - condition: template
@@ -504,24 +529,29 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - wd_off2
+            id: wd_off2
         sequence:
           - if:
               - condition: template
                 value_template: "{{ climate_mode == 'schedule' and climate_entity != '' and is_state(workday_sensor, 'on') }}"
             then:
               - choose:
-                  - conditions: "{{ rest_mode == 'off' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'off' }}"
                     sequence:
                       - service: climate.turn_off
                         target: { entity_id: !input climate_entity }
-                  - conditions: "{{ rest_mode == 'eco' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'eco' }}"
                     sequence:
                       - service: climate.set_preset_mode
                         target: { entity_id: !input climate_entity }
                         data: { preset_mode: eco }
-                  - conditions: "{{ rest_mode == 'heat' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'heat' }}"
                     sequence:
                       - service: climate.set_hvac_mode
                         target: { entity_id: !input climate_entity }
@@ -533,8 +563,7 @@ action:
       # ------------- Helg tidsplan -------------
       - conditions:
           - condition: trigger
-            id:
-              - we_on1
+            id: we_on1
         sequence:
           - if:
               - condition: template
@@ -549,24 +578,29 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - we_off1
+            id: we_off1
         sequence:
           - if:
               - condition: template
                 value_template: "{{ climate_mode == 'schedule' and climate_entity != '' and is_state(workday_sensor, 'off') }}"
             then:
               - choose:
-                  - conditions: "{{ rest_mode == 'off' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'off' }}"
                     sequence:
                       - service: climate.turn_off
                         target: { entity_id: !input climate_entity }
-                  - conditions: "{{ rest_mode == 'eco' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'eco' }}"
                     sequence:
                       - service: climate.set_preset_mode
                         target: { entity_id: !input climate_entity }
                         data: { preset_mode: eco }
-                  - conditions: "{{ rest_mode == 'heat' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'heat' }}"
                     sequence:
                       - service: climate.set_hvac_mode
                         target: { entity_id: !input climate_entity }
@@ -577,8 +611,7 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - we_on2
+            id: we_on2
         sequence:
           - if:
               - condition: template
@@ -593,31 +626,33 @@ action:
 
       - conditions:
           - condition: trigger
-            id:
-              - we_off2
+            id: we_off2
         sequence:
           - if:
               - condition: template
                 value_template: "{{ climate_mode == 'schedule' and climate_entity != '' and is_state(workday_sensor, 'off') }}"
             then:
               - choose:
-                  - conditions: "{{ rest_mode == 'off' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'off' }}"
                     sequence:
                       - service: climate.turn_off
                         target: { entity_id: !input climate_entity }
-                  - conditions: "{{ rest_mode == 'eco' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'eco' }}"
                     sequence:
                       - service: climate.set_preset_mode
                         target: { entity_id: !input climate_entity }
                         data: { preset_mode: eco }
-                  - conditions: "{{ rest_mode == 'heat' }}"
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ rest_mode == 'heat' }}"
                     sequence:
                       - service: climate.set_hvac_mode
                         target: { entity_id: !input climate_entity }
                         data: { hvac_mode: heat }
                       - service: climate.set_temperature
                         target: { entity_id: !input climate_entity }
-                        data: { temperature: !input rest_setpoint }
-
-# Sikkerhet: gjør ingenting hvis climate ikke er valgt
-#
+                       
